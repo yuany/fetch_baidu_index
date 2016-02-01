@@ -26,7 +26,6 @@ class Api(object):
         self.headers.update({'Cookie': cookie})
 
     def get_all_index_html(self, all_index_url):
-        print self.headers
         r = requests.get(all_index_url, headers=self.headers)
         return r.json()
 

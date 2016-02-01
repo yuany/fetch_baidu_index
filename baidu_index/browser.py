@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
 import time
 import urllib
 from datetime import datetime, timedelta
@@ -10,6 +9,7 @@ from selenium import webdriver
 
 import config
 from .api import Api
+from .utils.log import logger
 
 
 class BaiduBrowser(object):
@@ -19,8 +19,6 @@ class BaiduBrowser(object):
         self.browser.set_script_timeout(10)
         self.user_name = config.user_name
         self.password = config.password
-        self._ = dict()
-        self.last_reset_time = 0
         self.cookie = ''
         self.api = None
         self.cookie_dict_list = []
@@ -31,9 +29,6 @@ class BaiduBrowser(object):
         if not self.cookie:
             self.login(self.user_name, self.password)
         self.api = Api(self.cookie)
-
-    def reset_browser(self):
-        pass
 
     def get_date_info(self, start_date, end_date):
         start_date = datetime.strptime(start_date, '%Y%m%d')
@@ -49,9 +44,6 @@ class BaiduBrowser(object):
         return start_date, end_date, date_list
 
     def get_baidu_index(self, keyword):
-        if not self.cookie:
-            raw_input(u'没有登陆成功，请输入任意键然后结束.')
-            sys.exit(0)
         url = 'http://index.baidu.com/?tpl=trend&type=0&area=0&time=12&word={word}'.format(
             word=urllib.quote(keyword.encode('gbk'))
         )
@@ -71,9 +63,7 @@ class BaiduBrowser(object):
         all_index_url = all_index_url.format(
             res=res, res2=res2, start_date=start_date, end_date=end_date
         )
-        print 'all_index_url:%s' % all_index_url
         all_index_info = self.api.get_all_index_html(all_index_url)
-        print all_index_info
         enc_s = all_index_info['data']['all'][0]['userIndexes_enc'].split(',')
 
         baidu_index_dict = dict()
@@ -101,19 +91,10 @@ class BaiduBrowser(object):
         ps_obj.send_keys(password)
         sub_obj = self.browser.find_element_by_id('TANGRAM__PSP_3__submit')
         sub_obj.click()
-        print u'请确保能够成功登陆百度，输入你的账号和密码，有验证码要手动输入一下'
+        logger.info(u'请确保能够成功登陆百度，输入你的账号和密码，有验证码要手动输入一下')
         while self.browser.current_url == login_url:
             time.sleep(1)
         self.cookie = self.get_current_cookie_str()
-
-    def login_with_cookie(self):
-        self.browser.get('https://www.baidu.com/')
-        cookie_dict_list = self.cookie_dict_list
-        for cookie_dict in cookie_dict_list:
-            try:
-                self.browser.add_cookie(cookie_dict)
-            except:
-                continue
 
     def close(self):
         self.browser.quit()
@@ -123,3 +104,12 @@ class BaiduBrowser(object):
         cookies = self.browser.get_cookies()
         return '; '.join(['%s=%s' % (item['name'], item['value'])
                           for item in cookies])
+
+    def login_with_cookie(self):
+        self.browser.get('https://www.baidu.com/')
+        cookie_dict_list = self.cookie_dict_list
+        for cookie_dict in cookie_dict_list:
+            try:
+                self.browser.add_cookie(cookie_dict)
+            except:
+                continue
