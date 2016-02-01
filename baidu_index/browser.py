@@ -44,11 +44,10 @@ class BaiduBrowser(object):
         return start_date, end_date, date_list
 
     def get_baidu_index(self, keyword):
-        url = 'http://index.baidu.com/?tpl=trend&type=0&area=0&time=12&word={word}'.format(
+        url = config.one_week_trend_url.format(
             word=urllib.quote(keyword.encode('gbk'))
         )
         self.browser.get(url)
-        time.sleep(3)
         res = self.browser.execute_script('return PPval.ppt;')
         res2 = self.browser.execute_script('return PPval.res2;')
         start_date, end_date = self.browser.execute_script(
@@ -57,24 +56,17 @@ class BaiduBrowser(object):
         start_date, end_date, date_list = self.get_date_info(
             start_date, end_date
         )
-        all_index_url = ('http://index.baidu.com/Interface/Search/getAllIndex/'
-                         '?res={res}&res2={res2}&startdate={start_date}'
-                         '&enddate={end_date}')
-        all_index_url = all_index_url.format(
+        url = config.all_index_url.format(
             res=res, res2=res2, start_date=start_date, end_date=end_date
         )
-        all_index_info = self.api.get_all_index_html(all_index_url)
+        all_index_info = self.api.get_all_index_html(url)
         enc_s = all_index_info['data']['all'][0]['userIndexes_enc'].split(',')
 
         baidu_index_dict = dict()
         for index, _ in enumerate(enc_s):
-            url = ('http://index.baidu.com/Interface/IndexShow/show/?res='
-                   '{res}&res2={res2}&classType=1&res3[]={enc_index}'
-                   '&className=view-value&{t}'
-                   )
-            url = url.format(res=res, res2=res2, enc_index=_,
-                             t=int(time.time()) * 1000
-                             )
+            url = config.index_show_url.format(
+                res=res, res2=res2, enc_index=_, t=int(time.time()) * 1000
+            )
             img_url, val_info = self.api.get_index_show_html(url)
             value = self.api.get_value_from_url(img_url, val_info)
             baidu_index_dict[date_list[index]] = value.replace(',', '')
