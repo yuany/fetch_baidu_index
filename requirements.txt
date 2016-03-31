@@ -1,3 +1,5 @@
 Pillow==2.9.0
 selenium==2.50.0
 requests==2.2.1
+openpyxl==2.3.3
+xlwt==1.0.0
