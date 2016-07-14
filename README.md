@@ -10,5 +10,5 @@
 
 3.baidu_index/config.py 不配置start_date和end_date，可以查询到这个关键词数据的最大区间
 
-4. python main.py
+4.python main.py
 
