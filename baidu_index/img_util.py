@@ -27,7 +27,7 @@ def get_num(img_data, index_skip_info):
         box = (skip_x, 0, skip_x + skip_w, height)
         new_img = img.crop(box)
         if counter == 1:
-            end_img = Image.new('RGB', (50, new_img.size[1]))
+            end_img = Image.new('RGB', (100, new_img.size[1]))
         end_img.paste(new_img, (last_width, 0))
         last_width += new_img.size[0]
 
